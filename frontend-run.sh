@@ -1,0 +1,2 @@
+cd journal_entries_frontend
+npm start
