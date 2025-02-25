@@ -46,6 +46,5 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 end
 
-
-
+gem "csv", "~> 3.0"
 gem "dotenv-rails", "~> 3.1"
