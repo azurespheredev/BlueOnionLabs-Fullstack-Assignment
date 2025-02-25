@@ -3,8 +3,9 @@ import { Alert, Box, IconButton, SelectChangeEvent, Skeleton } from "@mui/materi
 import RefreshIcon from "@mui/icons-material/Refresh";
 import JournalEntryFilter from "./components/JournalEntryFilter";
 import JournalEntryTable from "./components/JournalEntryTable";
-import { APIResponse, JournalEntryReport, JournalFilter } from "./types/journalEntries";
+import { APIResponse, JournalEntry, JournalEntryReport, JournalFilter } from "./types/journalEntries";
 import { DownloadFileType, MonthsEnum } from "./enums/journalEntries";
+import { downloadAsCSV, downloadAsExcel } from "./services/journalEntries";
 
 const BASE_API_URL = "http://localhost:3000/api/v1";
 
@@ -58,7 +59,48 @@ export default function App() {
     [filter.month, filter.year]
   );
 
-  const downloadResults = async (format: DownloadFileType) => {};
+  const downloadResults = async (format: DownloadFileType) => {
+    setIsDownload(true);
+
+    // Fetch all journal entries from the API
+    const response = await fetch(`${BASE_API_URL}/journal_entries`);
+    const data: APIResponse = await response.json();
+
+    if (data.error) {
+      window.alert(data.error);
+    }
+
+    if (data.results) {
+      // Format the data for downloading as a file
+      const formattedData = data.results.flatMap((result: JournalEntryReport) => [
+        [`${result.journal_entry_date} Journal Entry:`],
+        ["Account", "Debit", "Credit", "Description"],
+        ...result.entries.map((entry: JournalEntry) => [
+          entry.account,
+          entry.debit ? parseFloat(entry.debit.toString()).toFixed(2) : "",
+          entry.credit ? parseFloat(entry.credit.toString()).toFixed(2) : "",
+          entry.description,
+        ]),
+        [
+          "Total",
+          result.totals.debit_total.toFixed(2),
+          result.totals.credit_total.toFixed(2),
+          "Ensuring journal balance",
+        ],
+        // add a gap of 2 rows
+        [],
+        [],
+      ]);
+
+      if (format === DownloadFileType.CSV) {
+        downloadAsCSV(formattedData);
+      } else if (format === DownloadFileType.EXCEL) {
+        downloadAsExcel(formattedData);
+      }
+    }
+
+    setIsDownload(false);
+  };
 
   React.useEffect(() => {
     fetchJournalEntries();
