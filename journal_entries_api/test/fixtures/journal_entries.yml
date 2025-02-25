@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  month: 1
+  year: 1
+  revenue: 9.99
+  shipping_revenue: 9.99
+  tax_payable: 9.99
+  payments_received: 9.99
+
+two:
+  month: 1
+  year: 1
+  revenue: 9.99
+  shipping_revenue: 9.99
+  tax_payable: 9.99
+  payments_received: 9.99

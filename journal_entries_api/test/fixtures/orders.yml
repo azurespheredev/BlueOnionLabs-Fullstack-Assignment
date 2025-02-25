@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  order_id: 1
+  ordered_at: 2025-02-25 03:13:37
+  item_type: MyString
+  price_per_item: 9.99
+  quantity: 1
+  shipping: 9.99
+  tax_rate: 9.99
+
+two:
+  order_id: 1
+  ordered_at: 2025-02-25 03:13:37
+  item_type: MyString
+  price_per_item: 9.99
+  quantity: 1
+  shipping: 9.99
+  tax_rate: 9.99
