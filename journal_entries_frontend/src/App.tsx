@@ -1,21 +1,31 @@
 import React from "react";
-import logo from "./logo.svg";
-import "./App.css";
+import { Box, SelectChangeEvent } from "@mui/material";
+import JournalEntryFilter from "./components/JournalEntryFilter";
+import { JournalFilter } from "./types/journalEntries";
+import { MonthsEnum } from "./enums/journalEntries";
 
-function App() {
+export default function App() {
+  const [filter, setFilter] = React.useState<JournalFilter>({
+    month: MonthsEnum.January,
+    year: new Date().getFullYear(),
+  });
+
+  const filterChangeHandlers = {
+    handleMonthChange: (event: SelectChangeEvent<number>) => {
+      setFilter({ ...filter, month: Number(event.target.value) });
+    },
+    handleYearChange: (event: SelectChangeEvent<number>) => {
+      setFilter({ ...filter, year: Number(event.target.value) });
+    },
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", maxWidth: 1024, mx: 4 }}>
+      <h1>{"Blue Onion Labs Journey Entry"}</h1>
+
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <JournalEntryFilter filter={filter} handlers={filterChangeHandlers} />
+      </Box>
+    </Box>
   );
 }
-
-export default App;
