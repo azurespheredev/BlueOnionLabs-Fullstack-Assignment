@@ -1,1 +1,2 @@
+cd journal_entries_api
 rails server
