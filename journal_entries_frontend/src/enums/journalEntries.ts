@@ -12,3 +12,8 @@ export enum MonthsEnum {
   November = 11,
   December = 12,
 }
+
+export enum DownloadFileType {
+  CSV = "csv",
+  EXCEL = "xlsx",
+}
