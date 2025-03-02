@@ -91,9 +91,3 @@ sh frontend-run.sh
 #### 3. Access the Web App
 
 You will see the web page running on [localhost:4000](http://localhost:4000) and there we go! 🥳
-
-## Candidate Contact Info
-
-Name: **Dustin Daniel Lee**
-
-Email: **[dustin.daniel.lee@gmail.com](mailto:dustin.daniel.lee@gmail.com)**
