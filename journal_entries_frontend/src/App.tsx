@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, IconButton, SelectChangeEvent, Skeleton } from "@mui/material";
+import { Alert, Box, Button, IconButton, SelectChangeEvent, Skeleton } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import JournalEntryFilter from "./components/JournalEntryFilter";
 import JournalEntryTable from "./components/JournalEntryTable";
@@ -10,10 +10,8 @@ import { downloadAsCSV, downloadAsExcel } from "./services/journalEntries";
 const BASE_API_URL = "http://localhost:3000/api/v1";
 
 export default function App() {
-  const [filter, setFilter] = React.useState<JournalFilter>({
-    month: MonthsEnum.January,
-    year: new Date().getFullYear(),
-  });
+  const [filter, setFilter] = React.useState<JournalFilter | null>(null);
+  const [groupByYear, setGroupByYear] = React.useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [isDownload, setIsDownload] = React.useState<boolean>(false);
   const [errorMessage, setErrorMessage] = React.useState<string>("");
@@ -28,36 +26,55 @@ export default function App() {
 
   const filterChangeHandlers = {
     handleMonthChange: (event: SelectChangeEvent<number>) => {
-      setFilter({ ...filter, month: Number(event.target.value) });
+      setFilter({ ...filter!, month: Number(event.target.value) });
     },
     handleYearChange: (event: SelectChangeEvent<number>) => {
-      setFilter({ ...filter, year: Number(event.target.value) });
+      setFilter({ ...filter!, year: Number(event.target.value) });
     },
   };
 
   // Fetch a single journal entry from the API
-  const fetchJournalEntries = React.useCallback(
-    async (selectedMonth?: number, selectedYear?: number) => {
-      setIsLoading(true);
+  const fetchJournalEntries = async (selectedMonth?: number, selectedYear?: number) => {
+    if (!filter) return;
 
-      const response = await fetch(
-        `${BASE_API_URL}/journal_entries?month=${selectedMonth ?? filter.month}&year=${selectedYear ?? filter.year}`
-      );
-      const data: APIResponse = await response.json();
+    setIsLoading(true);
+
+    const url = groupByYear
+      ? `${BASE_API_URL}/journal_entries?group_by=year&year=${selectedYear ?? filter.year}`
+      : `${BASE_API_URL}/journal_entries?month=${selectedMonth ?? filter.month}&year=${selectedYear ?? filter.year}`;
+
+    const response = await fetch(url);
+    const data: APIResponse = await response.json();
+
+    if (data.error) {
+      setErrorMessage(data.error);
+    }
+
+    if (data.results) {
+      setReport(data.results[0]);
+      setErrorMessage("");
+    }
+
+    setIsLoading(false);
+  };
+
+  const fetchLatestJournalEntry = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${BASE_API_URL}/journal_entries/latest`);
+      const data = await response.json();
 
       if (data.error) {
         setErrorMessage(data.error);
+      } else {
+        setFilter({ month: data.month, year: data.year });
+        fetchJournalEntries(data.month, data.year);
       }
-
-      if (data.results) {
-        setReport(data.results[0]);
-        setErrorMessage("");
-      }
-
-      setIsLoading(false);
-    },
-    [filter.month, filter.year]
-  );
+    } catch (error) {
+      setErrorMessage("Error fetching latest journal entry.");
+    }
+  };
 
   const downloadResults = async (format: DownloadFileType) => {
     setIsDownload(true);
@@ -103,15 +120,26 @@ export default function App() {
   };
 
   React.useEffect(() => {
-    fetchJournalEntries();
-  }, [fetchJournalEntries]);
+    fetchLatestJournalEntry();
+  }, []);
+
+  React.useEffect(() => {
+    if (filter) {
+      fetchJournalEntries();
+    }
+  }, [filter, groupByYear]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%", maxWidth: 1024, mx: 4 }}>
       <h1>{"Blue Onion Labs Journey Entry"}</h1>
 
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-        <JournalEntryFilter filter={filter} handlers={filterChangeHandlers} />
+        {filter && <JournalEntryFilter filter={filter} handlers={filterChangeHandlers} />}
+
+        <Button variant="contained" onClick={() => setGroupByYear(!groupByYear)}>
+          {groupByYear ? "Group By Month" : "Group By Year"}
+        </Button>
+
         <IconButton size="large" onClick={() => fetchJournalEntries()}>
           <RefreshIcon />
         </IconButton>

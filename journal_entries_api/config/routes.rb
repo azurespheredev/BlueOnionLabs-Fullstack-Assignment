@@ -1,7 +1,11 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
-      resources :journal_entries, only: [ :index ]
+      resources :journal_entries, only: [ :index ] do
+        collection do
+          get :latest
+        end
+      end
     end
   end
 
